@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "project": {
+    "name": "ReBot",
+    "initialized": "2026-10-02T02:18:00.444Z"
+  },
+  "workflow": {
+    "currentPhase": null,
+    "phase": "idle",
+    "mode": "standard",
+    "depth": "standard",
+    "researchOptIn": false,
+    "specLocked": false,
+    "acceptanceConfirmed": false,
+    "interviewComplete": false,
+    "interviewCompletedAt": null,
+    "currentWave": 0,
+    "totalWaves": 0,
+    "lastActivity": "2026-10-02T02:39:59.394Z",
+    "status": "idle"
+  },
+  "execution": {
+    "activeCheckpointId": null,
+    "completedPhases": [],
+    "pendingTasks": []
+  }
+}

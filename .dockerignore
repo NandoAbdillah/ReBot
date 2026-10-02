@@ -1,0 +1,12 @@
+node_modules
+dist
+.git
+.gitignore
+.vscode
+*.log
+logs/
+media/
+teleoffer-full-backup-*.json
+teleoffer-logs-*.txt
+scratch/
+.env

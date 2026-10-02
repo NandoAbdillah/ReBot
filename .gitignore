@@ -1,0 +1,29 @@
+node_modules/
+build/
+dist/
+coverage/
+scratch/
+fix-history/
+backups/
+backup-folder/
+.DS_Store
+*.log
+.env*
+!.env.example
+.idea/
+.vscode/
+android/
+
+# Runtime data & media - DO NOT COMMIT (Telegram sessions & media files)
+data/
+media/
+logs/
+
+# Local backups & exports
+teleoffer-*.json
+teleoffer-*.txt
+rebot-*.json
+rebot-*.txt
+lilybot-*.json
+lilybot-*.txt
+*.txt.bak
