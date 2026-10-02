@@ -9,6 +9,14 @@ export interface DetailedErrorLog {
   timestamp: string;
   timeWIB: string;
   accountId: string;
+  stage?:
+    | "send_message"
+    | "blocked_word"
+    | "trigger_resolve"
+    | "auth_send_otp"
+    | "auth_verify"
+    | "reconnect"
+    | "resolve_target";
   target?: string;
   keyword?: string;
   messagePreview?: string;
