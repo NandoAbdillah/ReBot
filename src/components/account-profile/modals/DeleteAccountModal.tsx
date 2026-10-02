@@ -65,9 +65,9 @@ export function DeleteAccountModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center modal-backdrop-theme p-4">
       <div
-        className="cyber-card w-full max-w-md p-6 flex flex-col relative z-10 space-y-4 animate-fade-in"
+        className="cyber-card modal-glass w-full max-w-md p-6 flex flex-col relative z-10 space-y-4 animate-fade-in rounded-2xl shadow-2xl"
         style={{ maxHeight: "90vh" }}
       >
         {/* Header */}
@@ -76,20 +76,20 @@ export function DeleteAccountModal({
             <ShieldAlert size={20} />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-white">Hapus Akun Permanen</h3>
+            <h3 className="text-lg font-bold text-1">Hapus Akun Permanen</h3>
             <p className="text-xs text-3">Tindakan ini tidak bisa dibatalkan</p>
           </div>
         </div>
 
         {/* Warning Message */}
         <div className="p-3.5 rounded-xl text-xs bg-[rgba(244,63,94,0.05)] border border-[rgba(244,63,94,0.15)] text-[#f43f5e]/90 leading-relaxed">
-          Konfigurasi, riwayat, dan sesi Telegram untuk akun <strong className="text-white">{accountId}</strong> akan dihapus permanen dari server. Bot akan dinonaktifkan sepenuhnya.
+          Konfigurasi, riwayat, dan sesi Telegram untuk akun <strong className="text-1">{accountId}</strong> akan dihapus permanen dari server. Bot akan dinonaktifkan sepenuhnya.
         </div>
 
         {/* Input Konfirmasi */}
         <div className="space-y-1.5">
           <label className="text-xs font-semibold text-2 block">
-            Ketik nama akun <span className="text-white font-mono">"{accountId}"</span> atau kata sandi konfirmasi:
+            Ketik nama akun <span className="text-1 font-mono">"{accountId}"</span> atau kata sandi konfirmasi:
           </label>
           <div className="relative">
             <input
@@ -112,7 +112,7 @@ export function DeleteAccountModal({
             </button>
           </div>
           <span className="text-[10px] text-3 block">
-            Ketik <strong className="text-white">{accountId}</strong>, <strong className="text-white">HAPUS</strong>, atau password login Anda.
+            Ketik <strong className="text-1">{accountId}</strong>, <strong className="text-1">HAPUS</strong>, atau password login Anda.
           </span>
         </div>
 
@@ -149,7 +149,7 @@ export function DeleteAccountModal({
             </div>
           </div>
           <span className="text-xs text-3 leading-tight">
-            Saya mengerti dampak penghapusan ini dan ingin menghapus akun <span className="text-white font-medium">{accountId}</span> secara permanen.
+            Saya mengerti dampak penghapusan ini dan ingin menghapus akun <span className="text-1 font-medium">{accountId}</span> secara permanen.
           </span>
         </label>
 

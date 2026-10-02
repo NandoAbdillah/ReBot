@@ -153,7 +153,7 @@ export default function DashboardPage({
                 <div className="flex-1">
                   <p className="text-sm font-bold" style={{ color: "var(--text-1)" }}>Limit Telegram Terdeteksi</p>
                   <p className="text-xs mt-0.5" style={{ color: "var(--text-2)" }}>
-                    Akun <span className="font-bold text-white">{alert.accountId}</span> terkena flood wait. Sisa waktu:{" "}
+                    Akun <span className="font-bold text-1">{alert.accountId}</span> terkena flood wait. Sisa waktu:{" "}
                     <span className="font-bold text-rose-400">{Math.ceil((alert.until - Date.now()) / 1000)}</span> detik.
                   </p>
                 </div>

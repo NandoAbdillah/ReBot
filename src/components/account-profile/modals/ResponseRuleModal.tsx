@@ -165,9 +165,9 @@ export function ResponseRuleModal({ rule, onSave, onClose }: RuleModalProps) {
   const canSave = keywords.length > 0 && replies.length > 0;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center modal-backdrop-theme p-4">
       <div
-        className="cyber-card w-full max-w-lg flex flex-col"
+        className="cyber-card modal-glass w-full max-w-lg flex flex-col rounded-2xl overflow-hidden shadow-2xl"
         style={{ maxHeight: "90vh" }}
       >
         {/* ── Header ── */}

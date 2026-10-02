@@ -20,8 +20,8 @@ export function GroupDetailModal({
   const totalSent = groupStat.total || 0;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-fade-in">
-      <div className="cyber-modal max-w-md w-full bg-card border border-theme rounded-xl overflow-hidden shadow-2xl flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center modal-backdrop-theme p-4 animate-fade-in">
+      <div className="cyber-card modal-glass max-w-md w-full rounded-2xl overflow-hidden shadow-2xl flex flex-col">
         <div className="px-5 py-4 border-b border-theme flex items-center justify-between bg-[rgba(var(--accent-rgb),0.03)]">
           <div className="flex items-center gap-2">
             <BarChart2 size={16} className="text-accent" />

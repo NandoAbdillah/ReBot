@@ -104,8 +104,8 @@ export function BroadcastJobModal({ job, onSave, onClose, saving }: BroadcastJob
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
-      <div className="cyber-modal max-w-lg w-full bg-card border border-theme rounded-xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center modal-backdrop-theme p-4 animate-fade-in">
+      <div className="cyber-card modal-glass max-w-lg w-full rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="px-5 py-4 border-b border-theme flex items-center justify-between bg-[rgba(var(--accent-rgb),0.03)]">
           <div className="flex items-center gap-2">

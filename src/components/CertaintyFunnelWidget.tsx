@@ -364,8 +364,8 @@ export default function CertaintyFunnelWidget({
 
       {/* MODAL BREAKDOWN KATA TERLARANG */}
       {showBlockedModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs">
-          <div className="bg-[var(--surface-1)] border border-[var(--border)] rounded-2xl max-w-md w-full p-5 shadow-2xl space-y-4 animate-fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop-theme">
+          <div className="cyber-card modal-glass rounded-2xl max-w-md w-full p-5 shadow-2xl space-y-4 animate-fade-in">
             <div className="flex items-center justify-between pb-3 border-b border-[var(--border)]">
               <div className="flex items-center gap-2">
                 <ShieldAlert size={18} className="text-amber-400" />
