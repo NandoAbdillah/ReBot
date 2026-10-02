@@ -39,7 +39,7 @@ export function createDashboardAuthRouter() {
       const validUser = configuredUser || "admin";
       const validHash =
         configuredHash ||
-        "$2a$10$oXk8m9U15wQ4uVlR8wW2ceF9Wj4eNfxb0N8n9i7Y0Z9gX8.vM66iG"; // bcrypt hash of "lilybot2026!"
+        "$2b$10$Ncp78yoqAz2x3mUvO6LJZu67PB0YO920apRZpbWx9DjmwsknZXuqa"; // bcrypt hash of "lilybot2026!"
 
       if (username.trim() !== validUser) {
         return res.status(401).json({ error: "Username atau password salah." });
