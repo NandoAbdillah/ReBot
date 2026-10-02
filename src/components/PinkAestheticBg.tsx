@@ -58,17 +58,17 @@ export default function PinkAestheticBg() {
       
       {/* Glowing background radial spots */}
       <div 
-        className="absolute w-[600px] h-[600px] rounded-full filter blur-[150px] opacity-15"
+        className="absolute w-[600px] h-[600px] rounded-full filter blur-[150px] opacity-25"
         style={{
-          background: "radial-gradient(circle, #ff40ca 0%, transparent 70%)",
+          background: "radial-gradient(circle, #f472b6 0%, rgba(251,207,232,0.4) 40%, transparent 70%)",
           top: "-10%",
           right: "-10%",
         }}
       />
       <div 
-        className="absolute w-[500px] h-[500px] rounded-full filter blur-[120px] opacity-10"
+        className="absolute w-[500px] h-[500px] rounded-full filter blur-[120px] opacity-20"
         style={{
-          background: "radial-gradient(circle, #ff9beb 0%, transparent 70%)",
+          background: "radial-gradient(circle, #fda4af 0%, rgba(254,215,170,0.3) 40%, transparent 70%)",
           bottom: "10%",
           left: "-5%",
         }}
@@ -80,7 +80,7 @@ export default function PinkAestheticBg() {
           key={heart.id}
           viewBox="0 0 24 24"
           fill="currentColor"
-          className="absolute text-[#ff40ca]/15 drop-shadow-[0_0_8px_rgba(255,102,216,0.3)]"
+          className="absolute text-pink-400/20 drop-shadow-[0_0_8px_rgba(244,114,182,0.25)]"
           style={{
             left: `${heart.x}%`,
             top: `${heart.y}%`,
@@ -91,7 +91,7 @@ export default function PinkAestheticBg() {
             y: [0, -40, 0],
             x: [0, 15, 0],
             rotate: [0, 45, 0],
-            opacity: [0.15, 0.4, 0.15],
+            opacity: [0.15, 0.45, 0.15],
           }}
           transition={{
             duration: heart.duration,
@@ -111,7 +111,7 @@ export default function PinkAestheticBg() {
             key={heart.id}
             viewBox="0 0 24 24"
             fill="currentColor"
-            className="absolute text-[var(--accent)] drop-shadow-[0_0_15px_rgba(255,102,216,0.8)]"
+            className="absolute text-pink-400 drop-shadow-[0_0_12px_rgba(244,114,182,0.6)]"
             style={{
               left: `${heart.x}%`,
               width: heart.size,
@@ -120,7 +120,7 @@ export default function PinkAestheticBg() {
             initial={{ y: "105vh", opacity: 0, scale: 0.5, rotate: -20 }}
             animate={{ 
               y: "-15vh", 
-              opacity: [0, 0.9, 0.9, 0], 
+              opacity: [0, 0.85, 0.85, 0], 
               scale: [0.5, 1.2, 1, 0.6],
               rotate: [-20, 20, -10, 45]
             }}

@@ -18,6 +18,7 @@ import AccountProfile from "./components/AccountProfile";
 import LoginPage from "./components/LoginPage";
 import { Field } from "./components/DashboardWidgets";
 import PinkAestheticBg from "./components/PinkAestheticBg";
+import { BRANDING, APP_STORAGE_KEYS } from "./config/branding.js";
 
 // Import Halaman Baru
 import DashboardPage from "./pages/DashboardPage";
@@ -32,11 +33,11 @@ import { Log, AccountStatus, StatsData, FloodAlert } from "./types";
 type ThemeName = "obsidian" | "phantom" | "blood" | "frost" | "pink";
 
 const THEMES: { id: ThemeName; label: string }[] = [
+  { id: "pink", label: "Lily Blossom (Soft Pink Glass)" },
   { id: "obsidian", label: "Obsidian" },
-  { id: "phantom", label: "Phantom" },
-  { id: "blood", label: "Blood" },
-  { id: "frost", label: "Frost" },
-  { id: "pink", label: "Pink Aesthetic" },
+  { id: "phantom", label: "Phantom Violet" },
+  { id: "blood", label: "Blood Circuit" },
+  { id: "frost", label: "Neon Frost" },
 ];
 
 export default function App() {
@@ -69,14 +70,19 @@ export default function App() {
   const [authError, setAuthError] = useState("");
   const [isConnecting, setIsConnecting] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
-  const [isAuthed, setIsAuthed] = useState(
-    () =>
-      sessionStorage.getItem("tele-auth") === "1" ||
-      localStorage.getItem("tele-auth") === "1",
-  );
-  const [theme, setTheme] = useState<ThemeName>(
-    () => (localStorage.getItem("teleoffer-theme") as ThemeName) || "obsidian",
-  );
+  const [isAuthed, setIsAuthed] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  const [theme, setTheme] = useState<ThemeName>(() => {
+    const saved = localStorage.getItem(APP_STORAGE_KEYS.theme);
+    const oldSaved = localStorage.getItem("teleoffer-theme");
+    if (oldSaved && !saved) {
+      localStorage.setItem(APP_STORAGE_KEYS.theme, oldSaved);
+      localStorage.removeItem("teleoffer-theme");
+      return (oldSaved as ThemeName);
+    }
+    return (saved as ThemeName) || "pink";
+  });
 
   const logsEndRef = useRef<HTMLDivElement>(null);
 
@@ -85,21 +91,33 @@ export default function App() {
     ? decodeURIComponent(accountMatch[1])
     : null;
 
-  const activePage = selectedAccountId
-    ? "account"
-    : location.pathname === "/logs"
-      ? "logs"
-      : location.pathname === "/ai"
-        ? "ai"
-        : location.pathname === "/inspect"
-          ? "inspect"
-          : location.pathname === "/settings"
-            ? "settings"
-            : "dash";
+  const PAGE_MAP: Record<string, string> = {
+    "/logs": "logs",
+    "/ai": "ai",
+    "/inspect": "inspect",
+    "/settings": "settings",
+    "/": "dash",
+  };
+  const activePage = selectedAccountId ? "account" : (PAGE_MAP[location.pathname] ?? "dash");
+
+  // Periksa sesi autentikasi server saat mount
+  useEffect(() => {
+    fetch("/api/auth/session")
+      .then((r) => r.json())
+      .then((data) => {
+        setIsAuthed(Boolean(data?.authenticated));
+        setCheckingAuth(false);
+      })
+      .catch(() => {
+        setIsAuthed(false);
+        setCheckingAuth(false);
+      });
+  }, []);
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
-    localStorage.setItem("teleoffer-theme", theme);
+    localStorage.setItem(APP_STORAGE_KEYS.theme, theme);
+    document.title = `${BRANDING.productName} Dashboard`;
   }, [theme]);
 
   const loadConfig = async () => {
@@ -121,11 +139,16 @@ export default function App() {
   };
 
   useEffect(() => {
+    if (!isAuthed) return;
+
     loadConfig();
     loadStats();
 
     fetch("/api/logs")
-      .then((r) => r.json())
+      .then((r) => {
+        if (r.status === 401) setIsAuthed(false);
+        return r.json();
+      })
       .then((data) => {
         if (Array.isArray(data?.logs)) setLogs(data.logs.slice(0, 100));
       })
@@ -158,7 +181,7 @@ export default function App() {
       socket.disconnect();
       clearInterval(refreshInterval);
     };
-  }, [statsAccountFilter]);
+  }, [isAuthed, statsAccountFilter]);
 
   useEffect(() => {
     if (floodAlerts.length === 0) return;
@@ -276,7 +299,7 @@ export default function App() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `teleoffer-full-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      a.download = `${BRANDING.productName.toLowerCase()}-full-backup-${new Date().toISOString().slice(0, 10)}.json`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -308,11 +331,35 @@ export default function App() {
     }
   };
 
-  const logout = () => {
-    sessionStorage.removeItem("tele-auth");
-    localStorage.removeItem("tele-auth");
+  const logout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch {}
     setIsAuthed(false);
   };
+
+  if (checkingAuth) {
+    return (
+      <div
+        className="min-h-screen flex flex-col items-center justify-center p-6 text-center select-none"
+        style={{
+          background:
+            "linear-gradient(135deg, #fff1f4 0%, #fdf2f8 40%, #fff5f7 70%, #fce7f3 100%)",
+        }}
+      >
+        <div className="w-16 h-16 rounded-3xl bg-white/80 backdrop-blur-md border border-pink-200/80 shadow-[0_8px_20px_rgba(244,114,182,0.18)] flex items-center justify-center p-2 mb-4 animate-bounce">
+          <img
+            src={BRANDING.logoPath}
+            alt={BRANDING.productName}
+            className="w-full h-full object-contain"
+          />
+        </div>
+        <p className="text-xs font-semibold text-slate-600 tracking-wide">
+          Memuat {BRANDING.productName}...
+        </p>
+      </div>
+    );
+  }
 
   if (!isAuthed) return <LoginPage onLogin={() => setIsAuthed(true)} />;
 
@@ -336,13 +383,17 @@ export default function App() {
         }}
       >
         <div
-          className="w-8 h-8 rounded-lg flex items-center justify-center mb-4 shrink-0"
+          className="w-9 h-9 rounded-2xl flex items-center justify-center mb-4 shrink-0 shadow-sm p-1.5 transition-transform hover:scale-105"
           style={{
             background: "var(--accent-gradient)",
             boxShadow: "var(--glow)",
           }}
         >
-          <Zap className="w-4 h-4 text-white fill-current" />
+          <img
+            src={BRANDING.logoPath}
+            alt={BRANDING.productName}
+            className="w-full h-full object-contain drop-shadow-xs"
+          />
         </div>
         {navItems.map(({ page, path, icon: Icon, label }) => {
           const isActive =

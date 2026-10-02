@@ -132,7 +132,7 @@ export function createSettingsRouter(deps: SettingsRouterDependencies) {
       res.setHeader("Content-Type", "application/json");
       res.setHeader(
         "Content-Disposition",
-        `attachment; filename="teleoffer-backup-${safeHeaderId}-${new Date().toISOString().slice(0, 10)}.json"`,
+        `attachment; filename="lilybot-backup-${safeHeaderId}-${new Date().toISOString().slice(0, 10)}.json"`,
       );
       res.json(exportData);
     } catch (err: any) {
@@ -204,7 +204,7 @@ export function createSettingsRouter(deps: SettingsRouterDependencies) {
       res.setHeader("Content-Type", "application/json");
       res.setHeader(
         "Content-Disposition",
-        `attachment; filename="teleoffer-full-backup-${new Date().toISOString().slice(0, 10)}.json"`,
+        `attachment; filename="lilybot-full-backup-${new Date().toISOString().slice(0, 10)}.json"`,
       );
       res.json(fullPackage);
     } catch (err: any) {

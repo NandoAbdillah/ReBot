@@ -286,7 +286,7 @@ export class AutoBackupService {
       }
 
       const todayStr = new Date().toISOString().slice(0, 10);
-      const fileName = `lunoxy-telebot-backup-${todayStr}.json`;
+      const fileName = `lilybot-backup-${todayStr}.json`;
       const timeWIB = new Date().toLocaleString("id-ID", {
         timeZone: "Asia/Jakarta",
         day: "2-digit",
@@ -306,15 +306,15 @@ export class AutoBackupService {
 
         try {
           const caption =
-            `[LUNOXY TELEBOT - SISTEM CADANGAN OTOMATIS]\n` +
+            `🌸 [LILYBOT - SISTEM CADANGAN OTOMATIS]\n` +
             `Waktu Backup: ${timeWIB}\n` +
             `Akun: ${acc.accountId}\n` +
             `Total Akun Terdaftar: ${accounts.length} Akun\n` +
             `Status: Cadangan data konfigurasi bot lengkap siap pulihkan.\n\n` +
             `Panduan Pemulihan:\n` +
             `1. Unduh file ${fileName} ini ke perangkat Anda.\n` +
-            `2. Buka dashboard LunoxyTelebot di server baru.\n` +
-            `3. Klik tombol "Impor Konfigurasi" dan pilih file ini.\n` +
+            `2. Buka dashboard LilyBot di server baru.\n` +
+            `3. Klik tombol "Impor Seluruh Konfigurasi" dan pilih file ini.\n` +
             `4. Seluruh bot, keyword, target, dan sesi langsung aktif kembali.`;
 
           const customFile = new CustomFile(fileName, fileBuffer.byteLength, snapshotPath, fileBuffer);

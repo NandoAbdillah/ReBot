@@ -34,9 +34,7 @@ export function DeleteAccountModal({
     if (!input) return false;
     return (
       input.toLowerCase() === accountId.toLowerCase() ||
-      input.toUpperCase() === "HAPUS" ||
-      input === "celiimutbangettz" ||
-      input.length >= 3
+      input.toUpperCase() === "HAPUS"
     );
   };
 
@@ -48,9 +46,7 @@ export function DeleteAccountModal({
     const input = deleteConfirmation.trim();
     const isValid =
       input.toLowerCase() === accountId.toLowerCase() ||
-      input.toUpperCase() === "HAPUS" ||
-      input === "celiimutbangettz" ||
-      input.length >= 3;
+      input.toUpperCase() === "HAPUS";
 
     if (!isValid) {
       setDeleteError(`Ketik "${accountId}" atau "HAPUS" untuk mengonfirmasi penghapusan.`);

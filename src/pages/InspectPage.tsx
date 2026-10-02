@@ -20,6 +20,7 @@ import {
   Send,
   Loader2,
 } from "lucide-react";
+import { BRANDING } from "../config/branding.js";
 
 interface InspectData {
   success: boolean;
@@ -687,7 +688,7 @@ export default function InspectPage({ onExportAll }: InspectPageProps) {
               Klik tombol <strong>"Kirim Backup ke Telegram Sekarang"</strong> atau <strong>"Unduh Full Backup"</strong> di atas.
             </li>
             <li>
-              Buka akun Railway baru Anda, buat project baru dan deploy repositori <strong>LunoxyTelebot</strong> ini.
+              Buka akun Railway baru Anda, buat project baru dan deploy repositori <strong>{BRANDING.productName}</strong> ini.
             </li>
             <li>
               Buka website Railway yang baru, buka <strong>Dashboard</strong> lalu klik tombol <strong>"Impor Seluruh Konfigurasi"</strong>.

@@ -103,7 +103,7 @@ export function createLogsRouter(deps: LogsRouterDeps) {
       return res.status(404).json({ error: "File log tidak ditemukan untuk tanggal tersebut." });
     }
     res.setHeader("Content-Type", "text/plain");
-    res.setHeader("Content-Disposition", `attachment; filename="teleoffer-logs-${dateStr}.txt"`);
+    res.setHeader("Content-Disposition", `attachment; filename="lilybot-logs-${dateStr}.txt"`);
     res.sendFile(logFilePath);
   });
 

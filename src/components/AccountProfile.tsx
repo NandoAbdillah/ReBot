@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { BRANDING } from "../config/branding.js";
 import {
   ArrowLeft,
   Trash2,
@@ -610,7 +611,7 @@ export default function AccountProfile({
       const safeName = account.accountId.replace(/[^\w\s-]/gi, "_").trim() || "account";
       const a = document.createElement("a");
       a.href = url;
-      a.download = `teleoffer-backup-${safeName}-${new Date().toISOString().slice(0, 10)}.json`;
+      a.download = `${BRANDING.productName.toLowerCase()}-backup-${safeName}-${new Date().toISOString().slice(0, 10)}.json`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);

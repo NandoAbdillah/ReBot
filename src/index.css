@@ -84,24 +84,24 @@
   --sigil-opacity: 0.04;
 }
 
-/* ── Theme: Pink Aesthetic (rose-dark + glowing pink) ────────────────── */
+/* ── Theme: Lily Pink Bloom (Soft Girly Pink Frosted Glass) ───────── */
 [data-theme="pink"] {
-  --bg-base: #0f070e;
-  --bg-card: #1a0f1a;
-  --bg-card-hover: #231523;
-  --bg-surface: #130a13;
-  --border: #351633;
-  --border-accent: #52224f;
-  --text-1: #ffeefc;
-  --text-2: #f4b3e9;
-  --text-3: #9d5d93;
-  --accent: #ff66d8;
-  --accent-bright: #ff9beb;
-  --accent-rgb: 255,102,216;
-  --accent-gradient: linear-gradient(135deg, #ff40ca, #ff9beb);
-  --glow: 0 0 25px rgba(255,102,216,0.18);
-  --glow-strong: 0 0 35px rgba(255,102,216,0.3);
-  --sigil-opacity: 0.06;
+  --bg-base: #fff6f9;
+  --bg-card: rgba(255, 255, 255, 0.78);
+  --bg-card-hover: rgba(255, 255, 255, 0.94);
+  --bg-surface: rgba(255, 255, 255, 0.68);
+  --border: rgba(244, 114, 182, 0.22);
+  --border-accent: rgba(244, 114, 182, 0.45);
+  --text-1: #381d33;
+  --text-2: #7a4f72;
+  --text-3: #a57d9d;
+  --accent: #f472b6;
+  --accent-bright: #fb7185;
+  --accent-rgb: 244,114,182;
+  --accent-gradient: linear-gradient(135deg, #f472b6 0%, #fb7185 100%);
+  --glow: 0 10px 30px -5px rgba(244,114,182,0.18);
+  --glow-strong: 0 14px 38px -4px rgba(244,114,182,0.28);
+  --sigil-opacity: 0.03;
 }
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -109,6 +109,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 :root { color-scheme: dark; }
+[data-theme="pink"] { color-scheme: light; }
 
 html {
   scroll-behavior: smooth;
@@ -116,12 +117,23 @@ html {
 }
 
 body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overscroll-behavior: none;
   background-color: var(--bg-base);
   color: var(--text-1);
+}
+
+/* Ambient soft girly mesh background when pink theme is active */
+[data-theme="pink"] body {
+  background-color: #fff6f9;
+  background-image:
+    radial-gradient(at 15% 15%, rgba(251, 207, 232, 0.5) 0px, transparent 55%),
+    radial-gradient(at 85% 10%, rgba(253, 164, 175, 0.38) 0px, transparent 50%),
+    radial-gradient(at 80% 85%, rgba(244, 114, 182, 0.28) 0px, transparent 50%),
+    radial-gradient(at 15% 85%, rgba(243, 232, 255, 0.45) 0px, transparent 50%);
+  background-attachment: fixed;
 }
 
 /* ── Scrollbar ─────────────────────────────────────────────────────── */
@@ -164,7 +176,7 @@ body {
 .cyber-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 16px;
   position: relative;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -176,11 +188,85 @@ body {
   right: 0;
   height: 1px;
   background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.4), transparent);
-  border-radius: 12px 12px 0 0;
+  border-radius: 16px 16px 0 0;
 }
 .cyber-card:hover {
   border-color: rgba(var(--accent-rgb), 0.25);
   box-shadow: var(--glow);
+}
+
+/* ── Lily Soft Girly Frosted Glass Overrides ─────────────────────── */
+[data-theme="pink"] .cyber-card {
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(18px) saturate(180%);
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 10px 30px -5px rgba(244, 114, 182, 0.12), 0 2px 8px rgba(0, 0, 0, 0.02);
+  border-radius: 20px;
+}
+
+[data-theme="pink"] .cyber-card::before {
+  background: linear-gradient(90deg, transparent, rgba(244, 114, 182, 0.4), transparent);
+  border-radius: 20px 20px 0 0;
+}
+
+[data-theme="pink"] .cyber-card:hover {
+  background: rgba(255, 255, 255, 0.94);
+  border-color: rgba(244, 114, 182, 0.35);
+  box-shadow: 0 16px 36px -6px rgba(244, 114, 182, 0.2);
+}
+
+[data-theme="pink"] .input-cyber {
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(244, 114, 182, 0.25);
+  border-radius: 14px;
+  color: var(--text-1);
+  box-shadow: 0 2px 6px rgba(244, 114, 182, 0.05);
+}
+
+[data-theme="pink"] .input-cyber:focus {
+  background: #ffffff;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(244, 114, 182, 0.18);
+}
+
+[data-theme="pink"] .btn-accent {
+  background: linear-gradient(135deg, #f472b6 0%, #fb7185 100%);
+  border-radius: 14px;
+  box-shadow: 0 8px 22px -4px rgba(244, 114, 182, 0.38);
+}
+
+[data-theme="pink"] .btn-ghost {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(244, 114, 182, 0.22);
+  color: var(--text-2);
+  border-radius: 14px;
+}
+
+[data-theme="pink"] .btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--text-1);
+  border-color: var(--accent);
+}
+
+[data-theme="pink"] .chip {
+  background: rgba(244, 114, 182, 0.12);
+  border: 1px solid rgba(244, 114, 182, 0.28);
+  color: #db2777;
+  border-radius: 9999px;
+}
+
+[data-theme="pink"] aside {
+  background: rgba(255, 255, 255, 0.82) !important;
+  backdrop-filter: blur(20px) saturate(180%);
+  border-right: 1px solid rgba(244, 114, 182, 0.2) !important;
+}
+
+[data-theme="pink"] .glass {
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(244, 114, 182, 0.2);
 }
 
 /* ── Cyber Card with clipped corner ────────────────────────────────── */

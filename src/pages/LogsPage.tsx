@@ -20,6 +20,7 @@ import {
   HardDrive,
 } from "lucide-react";
 import { Log } from "../types";
+import { BRANDING } from "../config/branding.js";
 
 interface LogsPageProps {
   logs: Log[];
@@ -237,7 +238,7 @@ export default function LogsPage({
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `teleoffer-logs-today-${new Date().toISOString().slice(0, 10)}.txt`;
+      a.download = `${BRANDING.productName.toLowerCase()}-logs-today-${new Date().toISOString().slice(0, 10)}.txt`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -711,7 +712,7 @@ export default function LogsPage({
             </div>
 
             <span className="text-[10px] font-mono text-3">
-              {selectedDate === "today" ? "root@teleoffer:~# tail -f /var/log/system.log" : `root@teleoffer:~# cat /var/log/system-${selectedDate}.log`}
+              {selectedDate === "today" ? `root@${BRANDING.productName.toLowerCase()}:~# tail -f /var/log/system.log` : `root@${BRANDING.productName.toLowerCase()}:~# cat /var/log/system-${selectedDate}.log`}
             </span>
           </div>
 

@@ -1,4 +1,4 @@
-# Dockerfile for LunoxyTelebot
+# Dockerfile for LilyBot
 FROM node:22-slim
 
 # Set working directory

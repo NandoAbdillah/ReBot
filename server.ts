@@ -11,8 +11,11 @@ process.on("uncaughtException", (err: any) => {
   console.error("⚠️ [Process] Uncaught Exception ditangkap (server tetap jalan):", msg);
 });
 import express from "express";
+import cookieParser from "cookie-parser";
 import { createServer } from "http";
 import { Server } from "socket.io";
+import { requireAuth, requireAuthForSockets } from "./backend/config/auth.js";
+import { createDashboardAuthRouter } from "./backend/routes/dashboardAuthRoutes.js";
 import { TelegramClient, Api } from "telegram";
 import { StringSession } from "telegram/sessions/index.js";
 import { ConnectionTCPObfuscated } from "telegram/network/connection/TCPObfuscated.js";
@@ -180,11 +183,22 @@ const pendingAuthByAccount = new Map<string, PendingAuthState>();
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer);
-app.use(express.json({ limit: "100mb" }));
-app.use(express.urlencoded({ limit: "100mb", extended: true }));
 
-// Serve media folder statically
-app.use("/media", express.static(MEDIA_DIR));
+// Validasi handshake Socket.IO dengan cookie sesi
+io.use(requireAuthForSockets);
+
+app.use(cookieParser());
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ limit: "10mb", extended: true }));
+
+// Rute autentikasi dashboard (Login, Sesi, Logout) - Terbuka publik
+app.use("/api/auth", createDashboardAuthRouter());
+
+// Middleware proteksi autentikasi: seluruh rute /api/* wajib memiliki sesi valid
+app.use("/api", requireAuth);
+
+// Serve media folder statically (dilindungi autentikasi)
+app.use("/media", requireAuth, express.static(MEDIA_DIR));
 
 // Upload media endpoint
 app.post("/api/media/upload", (req, res) => {
