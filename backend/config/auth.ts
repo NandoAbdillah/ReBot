@@ -181,6 +181,7 @@ export function requireAuthForSockets(
  */
 export function getDashboardConfig() {
   const user = process.env.DASHBOARD_USER || "admin";
+  const pass = process.env.DASHBOARD_PASS || "admin";
   const passHash = process.env.DASHBOARD_PASS_HASH;
-  return { user, passHash };
+  return { user, pass, passHash };
 }
