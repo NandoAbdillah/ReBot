@@ -32,32 +32,32 @@ export class PollingService {
   public static readonly lastEventTimeByAccount = new Map<string, number>();
 
   public static init(deps: PollingServiceDependencies) {
-    this.deps = deps;
+    PollingService.deps = deps;
   }
 
   public static getLiveAccountId(tgClient: TelegramClient, fallbackId: string): string {
-    if (!this.deps) return fallbackId;
-    for (const [id, client] of this.deps.getAllLiveClients().entries()) {
+    if (!PollingService.deps) return fallbackId;
+    for (const [id, client] of PollingService.deps.getAllLiveClients().entries()) {
       if (client === tgClient) return id;
     }
     return fallbackId;
   }
 
   public static markEventReceived(accountId: string) {
-    this.lastEventTimeByAccount.set(accountId, Date.now());
+    PollingService.lastEventTimeByAccount.set(accountId, Date.now());
   }
 
   public static startPollingFallback(accountId: string, tgClient: TelegramClient) {
-    if (this.pollingTimerByAccount.has(accountId)) return;
+    if (PollingService.pollingTimerByAccount.has(accountId)) return;
 
     const timer = setInterval(async () => {
-      if (!this.deps) return;
-      const currentId = this.getLiveAccountId(tgClient, accountId);
-      const client = this.deps.getClient(currentId);
+      if (!PollingService.deps) return;
+      const currentId = PollingService.getLiveAccountId(tgClient, accountId);
+      const client = PollingService.deps.getClient(currentId);
       const settings = SettingsRepository.getAccountSettings(currentId);
 
       if (client && !client.connected && settings.isActive) {
-        this.deps.broadcastLog(
+        PollingService.deps.broadcastLog(
           `[${currentId}] Bot terputus/offline. Mencoba reconnect...`,
           "error",
         );
@@ -70,26 +70,26 @@ export class PollingService {
         }
         try {
           await fetchWithTimeout(client.connect(), 30000);
-          this.deps.broadcastLog(`[${currentId}] Reconnect otomatis berhasil!`, "success");
+          PollingService.deps.broadcastLog(`[${currentId}] Reconnect otomatis berhasil!`, "success");
         } catch {
           return;
         }
       }
 
       if (
-        this.pollingAccounts.has(currentId) ||
+        PollingService.pollingAccounts.has(currentId) ||
         !client?.connected ||
         !settings.isActive
       ) {
         return;
       }
 
-      const lastEvent = this.lastEventTimeByAccount.get(currentId) || 0;
+      const lastEvent = PollingService.lastEventTimeByAccount.get(currentId) || 0;
       // Jika event handler aktif menerima pesan dalam 45 detik terakhir, lewati polling fallback agar hemat koneksi
       if (Date.now() - lastEvent < 45000) {
         return;
       }
-      this.pollingAccounts.add(currentId);
+      PollingService.pollingAccounts.add(currentId);
 
       try {
         const targets = settings.targetGroups
@@ -102,7 +102,7 @@ export class PollingService {
             try {
               entity = await tgClient.getEntity(target);
             } catch {
-              this.deps.broadcastLog(
+              PollingService.deps.broadcastLog(
                 `[${accountId}] 🔍 Cache target "${target}" tidak ditemukan. Mengambil list dialogs Telegram untuk sinkronisasi cache...`,
                 "info",
               );
@@ -143,22 +143,22 @@ export class PollingService {
               const targetKey = normalizeTarget(
                 `${accountId}:${target}:${String(pollEntity?.id || "unknown")}`,
               );
-              const hasCursor = this.pollCursorByTarget.has(targetKey);
-              const cursor = this.pollCursorByTarget.get(targetKey) || 0;
+              const hasCursor = PollingService.pollCursorByTarget.has(targetKey);
+              const cursor = PollingService.pollCursorByTarget.get(targetKey) || 0;
               let maxSeen = cursor;
 
               if (!hasCursor) {
                 const latestId = sorted.length
                   ? Number(sorted[sorted.length - 1]?.id || 0)
                   : 0;
-                this.pollCursorByTarget.set(targetKey, latestId);
+                PollingService.pollCursorByTarget.set(targetKey, latestId);
 
                 // Proses pesan yang dikirim kurang dari 3 menit lalu (180 detik) meskipun cursor baru diinisialisasi
                 const nowSec = Math.floor(Date.now() / 1000);
                 for (const msg of sorted) {
                   const msgDate = msg.date || 0;
                   if (nowSec - msgDate < 180) {
-                    await this.deps.onIncomingMessage(accountId, tgClient, msg, "poll");
+                    await PollingService.deps.onIncomingMessage(accountId, tgClient, msg, "poll");
                   }
                 }
                 continue;
@@ -172,41 +172,41 @@ export class PollingService {
                   continue;
                 }
                 if (id > maxSeen) maxSeen = id;
-                await this.deps.onIncomingMessage(accountId, tgClient, msg, "poll");
+                await PollingService.deps.onIncomingMessage(accountId, tgClient, msg, "poll");
               }
 
-              this.pollCursorByTarget.set(targetKey, maxSeen);
+              PollingService.pollCursorByTarget.set(targetKey, maxSeen);
             }
           } catch (err: any) {
-            this.deps.broadcastLog(
+            PollingService.deps.broadcastLog(
               `[${accountId}] ❌ GAGAL memproses target "${target}" dalam polling fallback. Pastikan bot bergabung di grup/channel tersebut dan pemicu aktif. Detail: ${err.message}`,
               "error",
             );
           }
         }
       } finally {
-        this.pollingAccounts.delete(accountId);
+        PollingService.pollingAccounts.delete(accountId);
       }
     }, 20000);
 
-    this.pollingTimerByAccount.set(accountId, timer);
+    PollingService.pollingTimerByAccount.set(accountId, timer);
   }
 
   public static stopPolling(accountId: string) {
-    const timer = this.pollingTimerByAccount.get(accountId);
+    const timer = PollingService.pollingTimerByAccount.get(accountId);
     if (timer) {
       clearInterval(timer);
-      this.pollingTimerByAccount.delete(accountId);
+      PollingService.pollingTimerByAccount.delete(accountId);
     }
   }
 
   public static clearAll() {
-    for (const [, timer] of this.pollingTimerByAccount.entries()) {
+    for (const [, timer] of PollingService.pollingTimerByAccount.entries()) {
       clearInterval(timer);
     }
-    this.pollingTimerByAccount.clear();
-    this.pollingAccounts.clear();
-    this.pollCursorByTarget.clear();
-    this.lastEventTimeByAccount.clear();
+    PollingService.pollingTimerByAccount.clear();
+    PollingService.pollingAccounts.clear();
+    PollingService.pollCursorByTarget.clear();
+    PollingService.lastEventTimeByAccount.clear();
   }
 }

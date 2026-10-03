@@ -22,7 +22,7 @@ export class ReconnectService {
   private static deps: ReconnectDependencies | null = null;
 
   public static init(deps: ReconnectDependencies) {
-    this.deps = deps;
+    ReconnectService.deps = deps;
   }
 
   public static async autoReconnectAll(): Promise<void> {
@@ -32,7 +32,7 @@ export class ReconnectService {
       return;
     }
 
-    this.deps?.broadcastLog(
+    ReconnectService.deps?.broadcastLog(
       `Memulai auto-reconnect ${savedAccounts.length} akun secara paralel...`,
       "info",
     );
@@ -72,7 +72,7 @@ export class ReconnectService {
         await fetchWithTimeout(client.connect(), 30000);
 
         if (!client.connected) {
-          this.deps?.broadcastLog(`[${acc.accountId}] Gagal reconnect — skip.`, "error");
+          ReconnectService.deps?.broadcastLog(`[${acc.accountId}] Gagal reconnect — skip.`, "error");
           return;
         }
 
@@ -85,7 +85,7 @@ export class ReconnectService {
         }
 
         // Disconnect old client if any
-        const oldClient = this.deps?.liveClients.get(acc.accountId);
+        const oldClient = ReconnectService.deps?.liveClients.get(acc.accountId);
         if (oldClient && oldClient !== client) {
           await oldClient.disconnect().catch(() => undefined);
         }
@@ -93,22 +93,22 @@ export class ReconnectService {
         // Clear old polling timer
         PollingService.stopPolling(acc.accountId);
 
-        this.deps?.liveClients.set(acc.accountId, client);
+        ReconnectService.deps?.liveClients.set(acc.accountId, client);
         BotCore.setupBotCore(acc.accountId, client);
 
         if (settings.isActive) {
-          this.deps?.broadcastLog(
+          ReconnectService.deps?.broadcastLog(
             `[${acc.accountId}] ✅ Reconnect berhasil — bot AKTIF.`,
             "success",
           );
         } else {
-          this.deps?.broadcastLog(
+          ReconnectService.deps?.broadcastLog(
             `[${acc.accountId}] ✅ Reconnect berhasil — bot STANDBY (isActive=off).`,
             "info",
           );
         }
       } catch (err: any) {
-        this.deps?.broadcastLog(
+        ReconnectService.deps?.broadcastLog(
           `[${acc.accountId}] ❌ Reconnect gagal: ${err.message}`,
           "error",
         );
@@ -116,6 +116,6 @@ export class ReconnectService {
     });
 
     await Promise.allSettled(tasks);
-    this.deps?.broadcastLog("Auto-reconnect selesai.", "success");
+    ReconnectService.deps?.broadcastLog("Auto-reconnect selesai.", "success");
   }
 }

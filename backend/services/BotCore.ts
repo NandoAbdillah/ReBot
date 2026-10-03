@@ -51,7 +51,7 @@ export class BotCore {
   public static readonly repliedThreadKeys = new Set<string>();
 
   public static init(deps: BotCoreDependencies) {
-    this.deps = deps;
+    BotCore.deps = deps;
   }
 
   public static async getLinkedChatCandidates(
@@ -63,7 +63,7 @@ export class BotCore {
       return [];
     }
     const key = `${accountId}:${chat.className}:${String(chat.id || "")}`;
-    const cached = this.linkedChatCache.get(key);
+    const cached = BotCore.linkedChatCache.get(key);
     if (cached && cached.expires > Date.now()) return cached.candidates;
 
     try {
@@ -77,13 +77,13 @@ export class BotCore {
           );
       const linkedId = (full as any)?.fullChat?.linkedChatId;
       const candidates = toIdVariants(linkedId);
-      this.linkedChatCache.set(key, {
+      BotCore.linkedChatCache.set(key, {
         candidates,
         expires: Date.now() + 10 * 60 * 1000, // 10 menit TTL
       });
       return candidates;
     } catch {
-      this.linkedChatCache.set(key, {
+      BotCore.linkedChatCache.set(key, {
         candidates: [],
         expires: Date.now() + 2 * 60 * 1000,
       });
@@ -123,7 +123,7 @@ export class BotCore {
     channelMsgId: number,
   ): Promise<{ discussionMsgId: number; discussionChat: any } | null> {
     const key = `${String(channel?.id || "")}:${channelMsgId}`;
-    const cached = this.discussionCache.get(key);
+    const cached = BotCore.discussionCache.get(key);
     if (cached && cached.expires > Date.now()) return cached.data;
 
     try {
@@ -136,7 +136,7 @@ export class BotCore {
       const msgs: any[] = result?.messages || [];
       const chats: any[] = result?.chats || [];
       if (!msgs.length) {
-        this.discussionCache.set(key, {
+        BotCore.discussionCache.set(key, {
           data: null,
           expires: Date.now() + 5 * 60 * 1000,
         });
@@ -144,7 +144,7 @@ export class BotCore {
       }
       const discussionMsgId = Number(msgs[0]?.id || 0);
       if (!discussionMsgId) {
-        this.discussionCache.set(key, {
+        BotCore.discussionCache.set(key, {
           data: null,
           expires: Date.now() + 5 * 60 * 1000,
         });
@@ -156,13 +156,13 @@ export class BotCore {
         chats[0] ||
         null;
       const data = { discussionMsgId, discussionChat };
-      this.discussionCache.set(key, {
+      BotCore.discussionCache.set(key, {
         data,
         expires: Date.now() + 15 * 60 * 1000,
       });
       return data;
     } catch {
-      this.discussionCache.set(key, {
+      BotCore.discussionCache.set(key, {
         data: null,
         expires: Date.now() + 2 * 60 * 1000,
       });
@@ -176,7 +176,7 @@ export class BotCore {
     chat: any,
   ) {
     try {
-      const candidates = await this.getLinkedChatCandidates(
+      const candidates = await BotCore.getLinkedChatCandidates(
         accountId,
         tgClient,
         chat,
@@ -187,7 +187,7 @@ export class BotCore {
         } catch {}
       }
     } catch {}
-    return this.resolveReplyTarget(null, chat);
+    return BotCore.resolveReplyTarget(null, chat);
   }
 
   public static async handleIncomingMessage(
@@ -246,7 +246,7 @@ export class BotCore {
 
     // ─── EKSEKUSI BROADCAST JOB JIKA COCOK ───
     if (matchedBroadcastJob) {
-      const linkedCandidates = await this.getLinkedChatCandidates(
+      const linkedCandidates = await BotCore.getLinkedChatCandidates(
         accountId,
         tgClient,
         chat,
@@ -260,7 +260,7 @@ export class BotCore {
           linkedCandidates,
         )
       ) {
-        this.deps?.broadcastLog(
+        BotCore.deps?.broadcastLog(
           `[${accountId}] [Broadcaster Trigger] Keyword "${matchedBroadcastKw}" cocok dengan Job "${matchedBroadcastJob.name}". Mengirim balasan...`,
           "bot",
         );
@@ -292,7 +292,7 @@ export class BotCore {
                 Number(message.id || 0);
 
           if (String(chat?.className || "") === "Channel") {
-            const disc = await this.getDiscussionMsgId(
+            const disc = await BotCore.getDiscussionMsgId(
               tgClient,
               chat,
               threadTopId,
@@ -300,21 +300,21 @@ export class BotCore {
             if (disc) {
               replyTarget =
                 disc.discussionChat ||
-                (await this.resolveDiscussionReplyTarget(
+                (await BotCore.resolveDiscussionReplyTarget(
                   accountId,
                   tgClient,
                   chat,
                 ));
               replyMsgId = disc.discussionMsgId;
             } else {
-              replyTarget = await this.resolveDiscussionReplyTarget(
+              replyTarget = await BotCore.resolveDiscussionReplyTarget(
                 accountId,
                 tgClient,
                 chat,
               );
             }
           } else {
-            replyTarget = await this.resolveReplyTarget(message, chat);
+            replyTarget = await BotCore.resolveReplyTarget(message, chat);
           }
 
           const targetUsername =
@@ -367,7 +367,7 @@ export class BotCore {
         );
       if (!startsWithEmoji) {
         StatsRepository.recordFunnelEvent("skipped");
-        this.deps?.broadcastLog(
+        BotCore.deps?.broadcastLog(
           `[${accountId}] ⏭️ SKIP [Emoji Prefix]: Pesan keyword "${detectedKeyword}" di "${chat?.title || "grup"}" dilewati — tidak dimulai dengan emoji`,
           "info",
         );
@@ -403,7 +403,7 @@ export class BotCore {
 
       if (hasBlockedSignature) {
         StatsRepository.recordFunnelEvent("blocked", 1, "blocked_signature");
-        this.deps?.broadcastLog(
+        BotCore.deps?.broadcastLog(
           `[${accountId}] 🛑 BLOCKED: Pesan di "${chat?.title || "grup"}" diblokir karena signature mengandung kata jebakan: "${signatures.join(", ")}"`,
           "warning",
         );
@@ -450,7 +450,7 @@ export class BotCore {
 
         if (!isIdentityAllowed && !isSignatureAllowed) {
           StatsRepository.recordFunnelEvent("skipped");
-          this.deps?.broadcastLog(
+          BotCore.deps?.broadcastLog(
             `[${accountId}] ⚠️ SKIP: Pesan keyword "${detectedKeyword}" di "${chat?.title || "grup"}" dilewati (Allowed Senders: ${allowedList.join(", ")}). [sender: "${senderTitle || senderUsername || "-"}", fwdCh: "${fwdChannelId || "-"}", chat: "${chatTitle || "-"}", sig: "${signatures.join(",") || "-"}"]`,
             "info",
           );
@@ -483,7 +483,7 @@ export class BotCore {
         StatsRepository.recordFunnelEvent("blocked", 1, detectedBlockedWord);
         const groupName = chat?.title || chat?.username || "unknown";
         const groupId = formatTargetId(peer);
-        this.deps?.broadcastLog(
+        BotCore.deps?.broadcastLog(
           `[${accountId}] ⚠️ Pesan dicegat di grup "${groupName}" (ID: ${groupId})! Mengandung kata terlarang: [${detectedBlockedWord}]`,
           "warning",
         );
@@ -517,25 +517,25 @@ export class BotCore {
 
         if (aiDecision.intent === "SKIP") {
           StatsRepository.recordFunnelEvent("skipped");
-          this.deps?.broadcastLog(
+          BotCore.deps?.broadcastLog(
             `[AI Intent] [Akun: ${infoAkun} | Model: ${infoModel}] SKIP: Bukan target. Kwd: "${detectedKeyword}" | Alasan: ${aiDecision.reason}`,
             "ai",
           );
           return;
         } else {
-          this.deps?.broadcastLog(
+          BotCore.deps?.broadcastLog(
             `[AI Intent] [Akun: ${infoAkun} | Model: ${infoModel}] PROMOSI: Niat valid. Kwd: "${detectedKeyword}" | Alasan: ${aiDecision.reason}`,
             "ai",
           );
         }
       } catch (aiErr: any) {
         if (aiErr.message?.includes("429")) {
-          this.deps?.broadcastLog(
+          BotCore.deps?.broadcastLog(
             `[AI Intent] Error Fatal (Semua Limit API Habis / 429).`,
             "ai",
           );
         } else {
-          this.deps?.broadcastLog(
+          BotCore.deps?.broadcastLog(
             `[AI Intent] Error evaluasi AI: ${aiErr.message}`,
             "ai",
           );
@@ -583,7 +583,7 @@ export class BotCore {
     );
     if (!isGroup) {
       StatsRepository.recordFunnelEvent("skipped");
-      this.deps?.broadcastLog(
+      BotCore.deps?.broadcastLog(
         `[${accountId}] ⏭️ SKIP [Bukan Grup]: Pesan keyword "${detectedKeyword}" berasal dari chat privat/bukan grup`,
         "info",
       );
@@ -604,7 +604,7 @@ export class BotCore {
     if (!isBroadcastChannel && !isChannelPeer) {
       if (sourceClass !== "Channel" && !fwdChannelPostIdEarly && !isFwd) {
         StatsRepository.recordFunnelEvent("skipped");
-        this.deps?.broadcastLog(
+        BotCore.deps?.broadcastLog(
           `[${accountId}] ⏭️ SKIP [Source Filter]: Pesan keyword "${detectedKeyword}" di "${chat?.title || "grup"}" — bukan dari channel/forward (class=${sourceClass}, broadcast=${isBroadcastChannel}, channelPeer=${isChannelPeer})`,
           "info",
         );
@@ -620,7 +620,7 @@ export class BotCore {
       !isChannelForward
     ) {
       StatsRepository.recordFunnelEvent("skipped");
-      this.deps?.broadcastLog(
+      BotCore.deps?.broadcastLog(
         `[${accountId}] ⏭️ SKIP [Sender Filter]: Pesan keyword "${detectedKeyword}" di "${chat?.title || "grup"}" — pengirim adalah user biasa (bukan bot/channel forward). Sender: "${sender?.username || sender?.firstName || "-"}"`,
         "info",
       );
@@ -644,19 +644,19 @@ export class BotCore {
     const canonicalMsgId = fwdChannelPostId || Number(message?.id || 0);
     const dedupeKey = `${accountId}:${canonicalPeerId}:${canonicalMsgId}`;
 
-    if (this.processedMessageKeys.has(dedupeKey)) {
+    if (BotCore.processedMessageKeys.has(dedupeKey)) {
       StatsRepository.recordFunnelEvent("skipped");
       return;
     }
-    this.processedMessageKeys.add(dedupeKey);
-    if (this.processedMessageKeys.size > 5000) this.processedMessageKeys.clear();
+    BotCore.processedMessageKeys.add(dedupeKey);
+    if (BotCore.processedMessageKeys.size > 5000) BotCore.processedMessageKeys.clear();
 
-    const linkedCandidates = await this.getLinkedChatCandidates(
+    const linkedCandidates = await BotCore.getLinkedChatCandidates(
       accountId,
       tgClient,
       chat,
     );
-    const matchedTarget = this.matchesConfiguredTarget(
+    const matchedTarget = BotCore.matchesConfiguredTarget(
       accountId,
       message,
       sender,
@@ -667,7 +667,7 @@ export class BotCore {
       StatsRepository.recordFunnelEvent("skipped");
       const activeTargets = settings.targetGroups.filter(Boolean);
       const resolvedTargetId = formatTargetId(peer);
-      this.deps?.broadcastLog(
+      BotCore.deps?.broadcastLog(
         `[${accountId}] ⚠️ SKIP: Grup "${chat?.title || chat?.username || "unknown"}" (ID: ${resolvedTargetId}) tidak cocok dengan Target Groups yang diatur: [${activeTargets.join(", ")}].`,
         "info",
       );
@@ -675,19 +675,19 @@ export class BotCore {
     }
 
     const threadKey = `${accountId}:${canonicalPeerId}:${canonicalMsgId}:${detectedKeyword || "custom"}`;
-    if (this.repliedThreadKeys.has(threadKey)) {
+    if (BotCore.repliedThreadKeys.has(threadKey)) {
       StatsRepository.recordFunnelEvent("skipped");
-      this.deps?.broadcastLog(
+      BotCore.deps?.broadcastLog(
         `[${accountId}] ⏭️ SKIP [Duplikat Thread]: Thread ${threadKey} sudah pernah dibalas sebelumnya`,
         "info",
       );
       return;
     }
 
-    this.repliedThreadKeys.add(threadKey);
-    if (this.repliedThreadKeys.size > 10000) this.repliedThreadKeys.clear();
+    BotCore.repliedThreadKeys.add(threadKey);
+    if (BotCore.repliedThreadKeys.size > 10000) BotCore.repliedThreadKeys.clear();
 
-    this.deps?.broadcastLog(
+    BotCore.deps?.broadcastLog(
       `[${accountId}] [TRIGGER][${source}] keyword="${detectedKeyword}" | teks="${rawText.slice(0, 100)}"`,
       "bot",
     );
@@ -708,7 +708,7 @@ export class BotCore {
       let replyMsgId = threadTopId;
 
       if (String(effectiveChat?.className || "") === "Channel") {
-        const disc = await this.getDiscussionMsgId(
+        const disc = await BotCore.getDiscussionMsgId(
           tgClient,
           effectiveChat,
           threadTopId,
@@ -716,21 +716,21 @@ export class BotCore {
         if (disc) {
           replyTarget =
             disc.discussionChat ||
-            (await this.resolveDiscussionReplyTarget(
+            (await BotCore.resolveDiscussionReplyTarget(
               accountId,
               tgClient,
               effectiveChat,
             ));
           replyMsgId = disc.discussionMsgId;
         } else {
-          replyTarget = await this.resolveDiscussionReplyTarget(
+          replyTarget = await BotCore.resolveDiscussionReplyTarget(
             accountId,
             tgClient,
             effectiveChat,
           );
         }
       } else {
-        replyTarget = await this.resolveReplyTarget(message, chat);
+        replyTarget = await BotCore.resolveReplyTarget(message, chat);
       }
 
       const groupLabel =
@@ -770,7 +770,7 @@ export class BotCore {
         );
       }
     } catch (err: any) {
-      this.deps?.broadcastLog(
+      BotCore.deps?.broadcastLog(
         `[${accountId}] Error final execution: ${err.message}`,
         "error",
       );
@@ -792,20 +792,20 @@ export class BotCore {
 
     // Start Auto Broadcaster jobs for this account
     const settings = SettingsRepository.getAccountSettings(accountId);
-    if (this.deps) {
+    if (BotCore.deps) {
       BroadcastService.restartAll(
         accountId,
         settings.broadcastJobs || [],
-        () => this.deps!.getClient(accountId),
-        this.deps.broadcastLog,
+        () => BotCore.deps!.getClient(accountId),
+        BotCore.deps.broadcastLog,
       );
     }
   }
 
   public static clearAll() {
-    this.linkedChatCache.clear();
-    this.discussionCache.clear();
-    this.processedMessageKeys.clear();
-    this.repliedThreadKeys.clear();
+    BotCore.linkedChatCache.clear();
+    BotCore.discussionCache.clear();
+    BotCore.processedMessageKeys.clear();
+    BotCore.repliedThreadKeys.clear();
   }
 }

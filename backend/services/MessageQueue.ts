@@ -46,22 +46,22 @@ export class MessageQueue {
   public static readonly consecutiveSuccessByAccount = new Map<string, number>();
 
   public static init(deps: MessageQueueDependencies) {
-    this.deps = deps;
+    MessageQueue.deps = deps;
   }
 
   public static async processQueue(accountId: string) {
-    const queue = this.responseQueueByAccount.get(accountId) || [];
-    const client = this.deps?.getClient(accountId);
+    const queue = MessageQueue.responseQueueByAccount.get(accountId) || [];
+    const client = MessageQueue.deps?.getClient(accountId);
 
     if (
-      this.processingQueueAccounts.has(accountId) ||
+      MessageQueue.processingQueueAccounts.has(accountId) ||
       queue.length === 0 ||
       !client?.connected
     ) {
       return;
     }
 
-    this.processingQueueAccounts.add(accountId);
+    MessageQueue.processingQueueAccounts.add(accountId);
 
     try {
       const task = queue.shift();
@@ -69,7 +69,7 @@ export class MessageQueue {
         try {
           // Per-group rate limiting: pastikan tidak kirim ke grup sama terlalu cepat (min 2 detik)
           const groupKey = `${accountId}:${formatTargetId(task.targetId)}`;
-          const lastGroupSend = this.lastSendTimePerGroup.get(groupKey) || 0;
+          const lastGroupSend = MessageQueue.lastSendTimePerGroup.get(groupKey) || 0;
           const groupElapsed = Date.now() - lastGroupSend;
           if (groupElapsed < 2000) {
             await new Promise((r) => setTimeout(r, 2000 - groupElapsed));
@@ -93,7 +93,7 @@ export class MessageQueue {
               task.targetId,
               sentMsgId,
             );
-            this.deps?.broadcastLog(
+            MessageQueue.deps?.broadcastLog(
               `[${accountId}] ✅ ${directLink ? `${directLink} | ` : ""}MEDIA TERKIRIM ke grup "${task.groupLabel}" (ID: ${formatTargetId(task.targetId)}) | keyword="${task.keyword || "-"}" | files="${task.mediaPaths.map((m) => path.basename(m)).join(", ")}" | replyTo=${task.replyTo}${sentMsgId ? ` | msgId=${sentMsgId}` : ""}`,
               "success",
             );
@@ -112,13 +112,13 @@ export class MessageQueue {
               task.targetId,
               sentMsgId,
             );
-            this.deps?.broadcastLog(
+            MessageQueue.deps?.broadcastLog(
               `[${accountId}] ✅ ${directLink ? `${directLink} | ` : ""}TERKIRIM ke grup "${task.groupLabel}" (ID: ${formatTargetId(task.targetId)}) | keyword="${task.keyword || "-"}" | balasan="${preview(task.message, 80)}" | replyTo=${task.replyTo}${sentMsgId ? ` | msgId=${sentMsgId}` : ""}`,
               "success",
             );
           }
 
-          this.lastSendTimePerGroup.set(groupKey, Date.now());
+          MessageQueue.lastSendTimePerGroup.set(groupKey, Date.now());
           StatsRepository.recordSendResult(
             "success",
             accountId,
@@ -127,8 +127,8 @@ export class MessageQueue {
           );
 
           // Track consecutive success for adaptive delay
-          const prevSuccess = this.consecutiveSuccessByAccount.get(accountId) || 0;
-          this.consecutiveSuccessByAccount.set(accountId, prevSuccess + 1);
+          const prevSuccess = MessageQueue.consecutiveSuccessByAccount.get(accountId) || 0;
+          MessageQueue.consecutiveSuccessByAccount.set(accountId, prevSuccess + 1);
 
           // Adaptive delay: gunakan antiSpamDelay dari settings (clamp nilai aman: min 500ms, max 5000ms).
           const rawSetting = SettingsRepository.getAccountSettings(accountId).antiSpamDelay;
@@ -143,16 +143,16 @@ export class MessageQueue {
             }
           }
 
-          const floodCooldownUntil = this.accountFloodCooldown.get(accountId) || 0;
+          const floodCooldownUntil = MessageQueue.accountFloodCooldown.get(accountId) || 0;
           const isInCooldown = Date.now() < floodCooldownUntil;
-          const consecutiveOk = this.consecutiveSuccessByAccount.get(accountId) || 0;
+          const consecutiveOk = MessageQueue.consecutiveSuccessByAccount.get(accountId) || 0;
 
           // Adaptive: jika banyak sukses berturut-turut, kurangi delay (min 500ms)
           // Jika dalam cooldown, naikkan delay
           let delay: number;
           if (isInCooldown) {
             delay = Math.min(baseSetting * 2, 4000);
-            this.consecutiveSuccessByAccount.set(accountId, 0);
+            MessageQueue.consecutiveSuccessByAccount.set(accountId, 0);
           } else if (consecutiveOk > 10) {
             delay = Math.max(baseSetting * 0.7, 500);
           } else {
@@ -179,7 +179,7 @@ export class MessageQueue {
             const rawSecs = parseInt(waitMatch?.[1] || waitMatch?.[0] || "10");
             const secs = Math.min(isNaN(rawSecs) ? 10 : rawSecs, 60);
 
-            this.deps?.broadcastLog(
+            MessageQueue.deps?.broadcastLog(
               `[${accountId}] ⏳ SLOWMODE / FLOOD WAIT (${secs}s) di "${task.groupLabel}" (ID: ${formatTargetId(task.targetId)}) | keyword="${task.keyword || "-"}". ${reason}`,
               "warning",
             );
@@ -207,8 +207,8 @@ export class MessageQueue {
             }
 
             // Set cooldown pada akun agar pengiriman berikutnya berjarak aman
-            this.accountFloodCooldown.set(accountId, Date.now() + secs * 1000);
-            this.consecutiveSuccessByAccount.set(accountId, 0);
+            MessageQueue.accountFloodCooldown.set(accountId, Date.now() + secs * 1000);
+            MessageQueue.consecutiveSuccessByAccount.set(accountId, 0);
             StatsRepository.recordSendResult(
               "failed",
               accountId,
@@ -219,7 +219,7 @@ export class MessageQueue {
             await new Promise((r) => setTimeout(r, Math.min(secs, 30) * 1000));
           } else {
             StatsRepository.recordFunnelEvent("delivery_failed");
-            this.deps?.broadcastLog(
+            MessageQueue.deps?.broadcastLog(
               `[${accountId}] ❌ GAGAL kirim ke grup "${task.groupLabel}" (ID: ${formatTargetId(task.targetId)}) | keyword="${task.keyword || "-"}" | balasan="${task.mediaPaths && task.mediaPaths.length > 0 ? `[Media Group] ${task.mediaPaths.map((m) => path.basename(m)).join(", ")}` : preview(task.message, 80)}" | kode=${code} | sebab: ${reason}`,
               "error",
             );
@@ -238,8 +238,8 @@ export class MessageQueue {
             });
             if (code === "CHAT_WRITE_FORBIDDEN") {
               const targetKey = `${accountId}:${formatTargetId(task.targetId)}`;
-              this.targetMuteCooldown.set(targetKey, Date.now() + 30 * 60 * 1000);
-              this.deps?.broadcastLog(
+              MessageQueue.targetMuteCooldown.set(targetKey, Date.now() + 30 * 60 * 1000);
+              MessageQueue.deps?.broadcastLog(
                 `[${accountId}] ⚠️ Akun terdeteksi di-MUTE/dilarang menulis di "${task.groupLabel}". Pengiriman ke grup ini di-pause otomatis selama 30 menit untuk mencegah penumpukan error gagal.`,
                 "warning",
               );
@@ -253,8 +253,8 @@ export class MessageQueue {
         }
       }
     } finally {
-      this.processingQueueAccounts.delete(accountId);
-      this.processQueue(accountId);
+      MessageQueue.processingQueueAccounts.delete(accountId);
+      MessageQueue.processQueue(accountId);
     }
   }
 
@@ -274,26 +274,26 @@ export class MessageQueue {
         ? `${accountId}:${replyTo}:media:${mediaPaths.join(",")}`
         : `${accountId}:${replyTo}:msg:${message || ""}`;
 
-    if (this.queuedReplySet.has(replyKey)) {
+    if (MessageQueue.queuedReplySet.has(replyKey)) {
       StatsRepository.recordFunnelEvent("skipped");
       return;
     }
 
     const targetMuteKey = `${accountId}:${formatTargetId(targetId)}`;
-    const muteUntil = this.targetMuteCooldown.get(targetMuteKey) || 0;
+    const muteUntil = MessageQueue.targetMuteCooldown.get(targetMuteKey) || 0;
     if (Date.now() < muteUntil) {
       // Target grup sedang di-mute untuk akun ini - lewati agar tidak spam gagal
       StatsRepository.recordFunnelEvent("skipped");
       return;
     }
 
-    this.queuedReplySet.add(replyKey);
-    if (this.queuedReplySet.size > 2000) this.queuedReplySet.clear();
+    MessageQueue.queuedReplySet.add(replyKey);
+    if (MessageQueue.queuedReplySet.size > 2000) MessageQueue.queuedReplySet.clear();
 
-    if (!this.responseQueueByAccount.has(accountId)) {
-      this.responseQueueByAccount.set(accountId, []);
+    if (!MessageQueue.responseQueueByAccount.has(accountId)) {
+      MessageQueue.responseQueueByAccount.set(accountId, []);
     }
-    const queue = this.responseQueueByAccount.get(accountId)!;
+    const queue = MessageQueue.responseQueueByAccount.get(accountId)!;
     queue.push({
       targetId,
       replyTo,
@@ -304,6 +304,6 @@ export class MessageQueue {
       configuredTargetId,
       targetUsername,
     });
-    this.processQueue(accountId);
+    MessageQueue.processQueue(accountId);
   }
 }

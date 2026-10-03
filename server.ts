@@ -139,7 +139,8 @@ PollingService.init({
   getClient: (id) => liveClients.get(id),
   getAllLiveClients: () => liveClients,
   broadcastLog,
-  onIncomingMessage: BotCore.handleIncomingMessage,
+  onIncomingMessage: (accId, tgClient, msg, src) =>
+    BotCore.handleIncomingMessage(accId, tgClient, msg, src),
 });
 
 BotCore.init({
